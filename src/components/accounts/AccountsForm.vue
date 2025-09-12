@@ -7,16 +7,6 @@
 
     <p class="hint">Для указания нескольких меток используйте разделитель «;»</p>
 
-    <!-- Черновики (редактируемые строки) -->
-    <AccountRow
-      v-for="(d, i) in drafts"
-      :key="d.id"
-      :model-value="d"
-      @update:model-value="(val) => (drafts[i] = val)"
-      @delete="deleteDraft(d.id)"
-      @submit-valid="saveDraft"
-    />
-
     <!-- Сохранённые элементы из стора (показываем как readonly) -->
     <AccountRow
       v-for="a in store.items"
@@ -25,6 +15,16 @@
       readonly
       @delete="store.remove(a.id)"
       @edit="edit(a.id)"
+    />
+
+    <!-- Черновики (редактируемые строки) -->
+    <AccountRow
+      v-for="(d, i) in drafts"
+      :key="d.id"
+      :model-value="d"
+      @update:model-value="(val) => (drafts[i] = val)"
+      @delete="deleteDraft(d.id)"
+      @submit-valid="saveDraft"
     />
   </div>
 </template>
