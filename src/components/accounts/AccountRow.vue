@@ -3,7 +3,6 @@
     <n-tooltip :disabled="!errMsg('labels')" trigger="hover" placement="top">
       <template #trigger>
         <n-input
-          v-if="!readonly"
           v-model:value="draft.labelsInput"
           placeholder="Метка (через ; )"
           @blur="onBlur('labels')"
@@ -11,17 +10,11 @@
           :title="errMsg('labels') || undefined"
           :aria-invalid="Boolean(err('labels'))"
         />
-        <n-input v-else :value="labelsReadonly" disabled />
       </template>
       {{ errMsg('labels') }}
     </n-tooltip>
 
-    <n-select
-      :options="typeOptions"
-      v-model:value="draft.type"
-      :disabled="readonly"
-      @update:value="onTypeChange"
-    />
+    <n-select :options="typeOptions" v-model:value="draft.type" @update:value="onTypeChange" />
 
     <n-tooltip :disabled="!errMsg('login')" trigger="hover" placement="top">
       <template #trigger>
@@ -29,7 +22,6 @@
           :class="loginClass"
           v-model:value="draft.login"
           placeholder="Логин"
-          :disabled="readonly"
           @blur="onBlur('login')"
           :status="err('login')"
           :title="errMsg('login') || undefined"
@@ -46,7 +38,6 @@
           v-model:value="draft.password"
           type="password"
           placeholder="Пароль"
-          :disabled="readonly"
           @blur="onBlur('password')"
           :status="err('password')"
           :title="errMsg('password') || undefined"
@@ -65,7 +56,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { NInput, NSelect, NButton, NTooltip } from 'naive-ui'
 import type { Account, AccountDraft } from '@/types/accounts'
 import { validateDraft } from '@/composables/useAccountValidation'
@@ -83,18 +74,30 @@ const emit = defineEmits<{
   (e: 'edit'): void
 }>()
 
-const draft = computed({
-  get: () =>
-    props.modelValue ?? {
-      id: props.initial?.id ?? '',
-      labelsInput: props.initial?.labels?.map((t) => t.text).join('; ') ?? '',
-      type: props.initial?.type ?? 'Local',
-      login: props.initial?.login ?? '',
-      password: props.initial?.password ?? '',
-      errors: {},
-      touched: {},
-    },
-  set: (v: AccountDraft) => emit('update:modelValue', v),
+const inner = ref<AccountDraft>({
+  id: props.initial?.id ?? '',
+  labelsInput: props.initial?.labels?.map((t) => t.text).join('; ') ?? '',
+  type: props.initial?.type ?? 'Local',
+  login: props.initial?.login ?? '',
+  password: props.initial?.password ?? '',
+  errors: {},
+  touched: {},
+})
+
+watch(
+  () => props.modelValue,
+  (v) => {
+    if (v) inner.value = v
+  },
+  { immediate: true },
+)
+
+const draft = computed<AccountDraft>({
+  get: () => props.modelValue ?? inner.value,
+  set: (v) => {
+    if (props.modelValue) emit('update:modelValue', v)
+    else inner.value = v
+  },
 })
 
 const typeOptions = [
@@ -102,8 +105,7 @@ const typeOptions = [
   { label: 'Локальная', value: 'Local' },
 ]
 
-const showPassword = computed(() => !props.readonly && draft.value.type === 'Local')
-const labelsReadonly = computed(() => props.initial?.labels.map((t) => t.text).join('; ') ?? '')
+const showPassword = computed(() => draft.value.type === 'Local')
 
 function err(field: 'labels' | 'login' | 'password') {
   return draft.value.touched?.[field] && draft.value.errors?.[field] ? 'error' : undefined
