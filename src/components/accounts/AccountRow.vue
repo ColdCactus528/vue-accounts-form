@@ -1,14 +1,21 @@
 <template>
   <div class="row" :class="{ readonly }">
     <!-- Метка -->
-    <n-input
-      v-if="!readonly"
-      v-model:value="draft.labelsInput"
-      placeholder="Метка (через ; )"
-      @blur="onBlur('labels')"
-      :status="err('labels')"
-    />
-    <n-input v-else :value="labelsReadonly" disabled />
+    <n-tooltip :disabled="!errMsg('labels')" trigger="hover" placement="top">
+      <template #trigger>
+        <n-input
+          v-if="!readonly"
+          v-model:value="draft.labelsInput"
+          placeholder="Метка (через ; )"
+          @blur="onBlur('labels')"
+          :status="err('labels')"
+          :title="errMsg('labels') || undefined"
+          :aria-invalid="Boolean(err('labels'))"
+        />
+        <n-input v-else :value="labelsReadonly" disabled />
+      </template>
+      {{ errMsg('labels') }}
+    </n-tooltip>
 
     <!-- Тип записи -->
     <n-select
@@ -19,24 +26,37 @@
     />
 
     <!-- Логин -->
-    <n-input
-      v-model:value="draft.login"
-      placeholder="Логин"
-      :disabled="readonly"
-      @blur="onBlur('login')"
-      :status="err('login')"
-    />
+    <n-tooltip :disabled="!errMsg('login')" trigger="hover" placement="top">
+      <template #trigger>
+        <n-input
+          v-model:value="draft.login"
+          placeholder="Логин"
+          :disabled="readonly"
+          @blur="onBlur('login')"
+          :status="err('login')"
+          :title="errMsg('login') || undefined"
+          :aria-invalid="Boolean(err('login'))"
+        />
+      </template>
+      {{ errMsg('login') }}
+    </n-tooltip>
 
     <!-- Пароль (только Local и не readonly) -->
-    <n-input
-      v-if="showPassword"
-      v-model:value="draft.password"
-      type="password"
-      placeholder="Пароль"
-      :disabled="readonly"
-      @blur="onBlur('password')"
-      :status="err('password')"
-    />
+    <n-tooltip v-if="showPassword" :disabled="!errMsg('password')" trigger="hover" placement="top">
+      <template #trigger>
+        <n-input
+          v-model:value="draft.password"
+          type="password"
+          placeholder="Пароль"
+          :disabled="readonly"
+          @blur="onBlur('password')"
+          :status="err('password')"
+          :title="errMsg('password') || undefined"
+          :aria-invalid="Boolean(err('password'))"
+        />
+      </template>
+      {{ errMsg('password') }}
+    </n-tooltip>
     <n-input v-else-if="!readonly" value="" disabled placeholder="Пароль скрыт для LDAP" />
 
     <!-- Действия -->
@@ -46,7 +66,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { NInput, NSelect, NButton } from 'naive-ui'
+import { NInput, NSelect, NButton, NTooltip } from 'naive-ui' // + NTooltip
 import type { Account, AccountDraft } from '@/types/accounts'
 import { validateDraft } from '@/composables/useAccountValidation'
 
@@ -87,6 +107,9 @@ const labelsReadonly = computed(() => props.initial?.labels.map((t) => t.text).j
 
 function err(field: 'labels' | 'login' | 'password') {
   return draft.value.touched?.[field] && draft.value.errors?.[field] ? 'error' : undefined
+}
+function errMsg(field: 'labels' | 'login' | 'password') {
+  return draft.value.touched?.[field] ? draft.value.errors?.[field] || '' : ''
 }
 
 function runValidation() {
