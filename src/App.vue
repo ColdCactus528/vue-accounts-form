@@ -1,11 +1,13 @@
 <script setup lang="ts"></script>
 
 <template>
-  <h1>You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
+  <div style="padding: 16 px">
+    <n-space>
+      <n-button type="primary">Проверка-UI-Пыш-Пыш</n-button>
+    </n-space>
+  </div>
 </template>
 
-<style scoped></style>
+<script setup lang="ts">
+import { NButton, NSpace } from 'naive-ui'
+</script>
