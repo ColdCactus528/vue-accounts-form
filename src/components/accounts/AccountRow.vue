@@ -1,6 +1,5 @@
 <template>
   <div class="row" :class="{ readonly }">
-    <!-- Метка -->
     <n-tooltip :disabled="!errMsg('labels')" trigger="hover" placement="top">
       <template #trigger>
         <n-input
@@ -17,7 +16,6 @@
       {{ errMsg('labels') }}
     </n-tooltip>
 
-    <!-- Тип записи -->
     <n-select
       :options="typeOptions"
       v-model:value="draft.type"
@@ -25,10 +23,10 @@
       @update:value="onTypeChange"
     />
 
-    <!-- Логин -->
     <n-tooltip :disabled="!errMsg('login')" trigger="hover" placement="top">
       <template #trigger>
         <n-input
+          :class="loginClass"
           v-model:value="draft.login"
           placeholder="Логин"
           :disabled="readonly"
@@ -41,10 +39,10 @@
       {{ errMsg('login') }}
     </n-tooltip>
 
-    <!-- Пароль (только Local и не readonly) -->
     <n-tooltip v-if="showPassword" :disabled="!errMsg('password')" trigger="hover" placement="top">
       <template #trigger>
         <n-input
+          class="password"
           v-model:value="draft.password"
           type="password"
           placeholder="Пароль"
@@ -57,16 +55,18 @@
       </template>
       {{ errMsg('password') }}
     </n-tooltip>
-    <n-input v-else-if="!readonly" value="" disabled placeholder="Пароль скрыт для LDAP" />
 
-    <!-- Действия -->
-    <n-button quaternary @click="$emit('delete')">🗑</n-button>
+    <div class="actions">
+      <n-button quaternary @click="$emit('delete')" class="trash-btn" title="Удалить">
+        🗑
+      </n-button>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { NInput, NSelect, NButton, NTooltip } from 'naive-ui' // + NTooltip
+import { NInput, NSelect, NButton, NTooltip } from 'naive-ui'
 import type { Account, AccountDraft } from '@/types/accounts'
 import { validateDraft } from '@/composables/useAccountValidation'
 
@@ -124,18 +124,44 @@ function onBlur(field: 'labels' | 'login' | 'password') {
 }
 
 function onTypeChange() {
-  // если переключили в LDAP — пароль скрываем и чистим
   if (draft.value.type === 'LDAP') draft.value.password = ''
   draft.value.touched.type = true
   runValidation()
 }
+
+const loginClass = computed(() => (showPassword.value ? 'login' : 'login login--wide'))
 </script>
 
 <style scoped>
 .row {
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr 1fr 1fr auto;
-  gap: 8px;
-  margin-bottom: 8px;
+  grid-template-columns: 1.2fr 0.9fr 1.6fr 1.2fr 40px;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.login {
+  grid-column: 3;
+}
+.password {
+  grid-column: 4;
+}
+.login--wide {
+  grid-column: 3 / 5;
+}
+
+.actions {
+  grid-column: 5;
+  justify-self: end;
+}
+
+.trash-btn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>
