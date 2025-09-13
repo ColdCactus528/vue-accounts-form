@@ -7,17 +7,6 @@
 
     <p class="hint">Для указания нескольких меток используйте разделитель «;»</p>
 
-    <!-- Сохранённые элементы из стора (показываем как readonly) -->
-    <AccountRow
-      v-for="a in store.items"
-      :key="a.id"
-      :initial="a"
-      readonly
-      @delete="store.remove(a.id)"
-      @edit="edit(a.id)"
-    />
-
-    <!-- Черновики (редактируемые строки) -->
     <AccountRow
       v-for="(d, i) in drafts"
       :key="d.id"
@@ -30,15 +19,29 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { NButton } from 'naive-ui'
 import AccountRow from './AccountRow.vue'
 import type { AccountDraft, Account } from '@/types/accounts'
 import { useAccountsStore } from '@/stores/accounts'
 
 const store = useAccountsStore()
-
 const drafts = ref<AccountDraft[]>([])
+
+onMounted(() => {
+  drafts.value = store.items.map((a) => ({
+    id: a.id,
+    labelsInput: (a.labels ?? [])
+      .map((t) => t.text)
+      .filter(Boolean)
+      .join('; '),
+    type: a.type,
+    login: a.login,
+    password: a.password ?? '',
+    errors: {},
+    touched: {},
+  }))
+})
 
 function add() {
   drafts.value.push({
@@ -54,26 +57,11 @@ function add() {
 
 function deleteDraft(id: string) {
   drafts.value = drafts.value.filter((d) => d.id !== id)
+  store.remove(id)
 }
 
 function saveDraft(a: Account) {
-  // валидная строка → убрать из черновиков и сохранить в стор
-  deleteDraft(a.id)
   store.upsert(a)
-}
-
-function edit(id: string) {
-  const a = store.items.find((x) => x.id === id)
-  if (!a) return
-  drafts.value.push({
-    id: a.id,
-    labelsInput: a.labels.map((t) => t.text).join('; '),
-    type: a.type,
-    login: a.login,
-    password: a.password ?? '',
-    errors: {},
-    touched: {},
-  })
 }
 </script>
 
