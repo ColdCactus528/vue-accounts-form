@@ -176,6 +176,12 @@ const loginClass = computed(() => (showPassword.value ? 'login' : 'login login--
   justify-self: end;
 }
 
+.eye-btn {
+  padding: 0 6px;
+  height: 24px;
+  line-height: 24px;
+}
+
 .trash-btn {
   width: 32px;
   height: 32px;
