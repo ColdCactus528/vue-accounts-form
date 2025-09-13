@@ -5,9 +5,18 @@
       <n-button type="primary" @click="add">+</n-button>
     </div>
 
-    <p class="hint">Для указания нескольких меток используйте разделитель «;»</p>
+    <n-alert type="info" :show-icon="true" class="hint">
+      Для указания нескольких меток для одной пары логин/пароль используйте разделитель «;»
+    </n-alert>
 
-    <!-- Черновики (редактируемые строки) -->
+    <div class="header">
+      <div class="hcell">Метки</div>
+      <div class="hcell">Тип записи</div>
+      <div class="hcell">Логин</div>
+      <div class="hcell">Пароль</div>
+      <div class="hcell"></div>
+    </div>
+
     <AccountRow
       v-for="(d, i) in drafts"
       :key="d.id"
@@ -16,29 +25,33 @@
       @delete="deleteDraft(d.id)"
       @submit-valid="saveDraft"
     />
-
-    <!-- Сохранённые элементы из стора (показываем как readonly) -->
-    <AccountRow
-      v-for="a in store.items"
-      :key="a.id"
-      :initial="a"
-      readonly
-      @delete="store.remove(a.id)"
-      @edit="edit(a.id)"
-    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { NButton } from 'naive-ui'
+import { ref, onMounted } from 'vue'
+import { NButton, NAlert } from 'naive-ui'
 import AccountRow from './AccountRow.vue'
 import type { AccountDraft, Account } from '@/types/accounts'
 import { useAccountsStore } from '@/stores/accounts'
 
 const store = useAccountsStore()
-
 const drafts = ref<AccountDraft[]>([])
+
+onMounted(() => {
+  drafts.value = store.items.map((a) => ({
+    id: a.id,
+    labelsInput: (a.labels ?? [])
+      .map((t) => t.text)
+      .filter(Boolean)
+      .join('; '),
+    type: a.type,
+    login: a.login,
+    password: a.password ?? '',
+    errors: {},
+    touched: {},
+  }))
+})
 
 function add() {
   drafts.value.push({
@@ -54,26 +67,11 @@ function add() {
 
 function deleteDraft(id: string) {
   drafts.value = drafts.value.filter((d) => d.id !== id)
+  store.remove(id)
 }
 
 function saveDraft(a: Account) {
-  // валидная строка → убрать из черновиков и сохранить в стор
-  deleteDraft(a.id)
   store.upsert(a)
-}
-
-function edit(id: string) {
-  const a = store.items.find((x) => x.id === id)
-  if (!a) return
-  drafts.value.push({
-    id: a.id,
-    labelsInput: a.labels.map((t) => t.text).join('; '),
-    type: a.type,
-    login: a.login,
-    password: a.password ?? '',
-    errors: {},
-    touched: {},
-  })
 }
 </script>
 
@@ -84,9 +82,24 @@ function edit(id: string) {
   gap: 12px;
   margin: 16px 0;
 }
+
 .hint {
   color: #6b7280;
   font-size: 12px;
   margin: 8px 0 16px;
+  padding: 2px 10px;
+}
+
+.header {
+  display: grid;
+  grid-template-columns: 1.2fr 0.9fr 1.6fr 1.2fr 40px;
+  gap: 12px;
+  align-items: end;
+  margin: 0 0 6px;
+}
+
+.hcell {
+  font-size: 12px;
+  color: #6b7280;
 }
 </style>

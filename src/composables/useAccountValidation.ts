@@ -16,6 +16,10 @@ export function validateDraft(d: AccountDraft) {
     else if (pwd.length > 100) errors.password = 'Макс. 100 символов'
   }
 
+  if (d.labelsInput && d.labelsInput.length > 50) {
+    errors.labels = 'Максимум 50 символов'
+  }
+
   const isValid = Object.keys(errors).length === 0
 
   const toAccount = (): Account => ({
