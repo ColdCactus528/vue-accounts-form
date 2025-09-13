@@ -36,13 +36,25 @@
         <n-input
           class="password"
           v-model:value="draft.password"
-          type="password"
+          :type="showPwd ? 'text' : 'password'"
           placeholder="Пароль"
           @blur="onBlur('password')"
           :status="err('password')"
           :title="errMsg('password') || undefined"
           :aria-invalid="Boolean(err('password'))"
-        />
+        >
+          <template #suffix>
+            <n-button
+              text
+              class="eye-btn"
+              @mousedown.prevent
+              @click.prevent="togglePwd"
+              :title="showPwd ? 'Скрыть' : 'Показать'"
+            >
+              {{ showPwd ? '🙈' : '👁️' }}
+            </n-button>
+          </template>
+        </n-input>
       </template>
       {{ errMsg('password') }}
     </n-tooltip>
@@ -107,6 +119,12 @@ const typeOptions = [
 
 const showPassword = computed(() => draft.value.type === 'Local')
 
+const showPwd = ref(false)
+
+function togglePwd() {
+  showPwd.value = !showPwd.value
+}
+
 function err(field: 'labels' | 'login' | 'password') {
   return draft.value.touched?.[field] && draft.value.errors?.[field] ? 'error' : undefined
 }
@@ -165,5 +183,11 @@ const loginClass = computed(() => (showPassword.value ? 'login' : 'login login--
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+.eye-btn {
+  padding: 0 6px;
+  height: 24px;
+  line-height: 24px;
 }
 </style>
