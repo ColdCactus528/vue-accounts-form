@@ -184,10 +184,4 @@ const loginClass = computed(() => (showPassword.value ? 'login' : 'login login--
   align-items: center;
   justify-content: center;
 }
-
-.eye-btn {
-  padding: 0 6px;
-  height: 24px;
-  line-height: 24px;
-}
 </style>
