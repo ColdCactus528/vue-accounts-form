@@ -1,39 +1,56 @@
-# vue-accounts-from-test
+# Vue Accounts Form
 
-This template should help get you started developing with Vue 3 in Vite.
+Форма управления учётными записями (логин/пароль/метки), написанная на **Vue 3 + Pinia + Naive UI**.  
+Поддерживает локальное хранение данных и валидацию полей. Есть автотесты на **Vitest** и возможность сборки Docker-образа.
 
-## Recommended IDE Setup
+🌐 Демо: [vue-accounts-form-xi.vercel.app](https://vue-accounts-form-xi.vercel.app/)
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+---
 
-## Type Support for `.vue` Imports in TS
+## 🚀 Запуск проекта локально
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+Убедитесь, что у вас установлен **Node.js 20+**.
 
-## Customize configuration
+```bash
+git clone https://github.com/ColdCactus528/vue-accounts-form.git
+cd vue-accounts-form
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+# Установка зависимостей
+npm ci
 
-## Project Setup
-
-```sh
-npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
+# Запуск в режиме разработки
 npm run dev
-```
 
-### Type-Check, Compile and Minify for Production
+# Проверка типов
+npm run type-check
 
-```sh
+# Сборка production-версии
 npm run build
+
+# Локальный предпросмотр собранного приложения
+npm run preview
 ```
 
-### Lint with [ESLint](https://eslint.org/)
+🧪 Тесты
+Тесты написаны с помощью Vitest и @vue/test-utils.
 
-```sh
-npm run lint
+```
+# Запуск всех тестов
+npm run test
+
+# Watch-режим
+npm run test:watch
+
+# Отчёт по покрытию
+npm run test:coverage
+```
+
+🐳 Docker
+
+Проект можно собрать и запускать в контейнере. После этого приложение будет доступно по адресу:
+👉 http://localhost:8080
+
+```
+docker build -t vue-accounts-form .
+docker run -p 8080:80 vue-accounts-form
 ```
