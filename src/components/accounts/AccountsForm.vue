@@ -34,35 +34,17 @@ import { NButton, NAlert } from 'naive-ui'
 import AccountRow from './AccountRow.vue'
 import type { AccountDraft, Account } from '@/types/accounts'
 import { useAccountsStore } from '@/stores/accounts'
+import { accountToDraft, emptyDraft } from '@/utils/accountMappers'
 
 const store = useAccountsStore()
 const drafts = ref<AccountDraft[]>([])
 
 onMounted(() => {
-  drafts.value = store.items.map((a) => ({
-    id: a.id,
-    labelsInput: (a.labels ?? [])
-      .map((t) => t.text)
-      .filter(Boolean)
-      .join('; '),
-    type: a.type,
-    login: a.login,
-    password: a.password ?? '',
-    errors: {},
-    touched: {},
-  }))
+  drafts.value = store.items.map(accountToDraft)
 })
 
 function add() {
-  drafts.value.push({
-    id: crypto.randomUUID(),
-    labelsInput: '',
-    type: 'Local',
-    login: '',
-    password: '',
-    errors: {},
-    touched: {},
-  })
+  drafts.value.push(emptyDraft())
 }
 
 function deleteDraft(id: string) {
