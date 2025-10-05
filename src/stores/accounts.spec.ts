@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { useAccountsStore } from './accounts'
+import { STORAGE_KEY_ACCOUNTS, ACCOUNT_TYPE_LOCAL, ACCOUNT_TYPE_LDAP } from '@/constants/accounts'
 
-const KEY = 'accounts:v1'
+const KEY = STORAGE_KEY_ACCOUNTS
 
 describe('accounts store', () => {
   beforeEach(() => {
@@ -15,7 +16,7 @@ describe('accounts store', () => {
     store.upsert({
       id: 'a1',
       labels: [{ text: 'HR' }],
-      type: 'Local',
+      type: ACCOUNT_TYPE_LOCAL,
       login: 'alice',
       password: 'pwd',
     })
@@ -27,7 +28,7 @@ describe('accounts store', () => {
     expect(fresh.items[0]).toMatchObject({
       id: 'a1',
       login: 'alice',
-      type: 'Local',
+      type: ACCOUNT_TYPE_LOCAL,
       labels: [{ text: 'HR' }],
       password: 'pwd',
     })
@@ -37,7 +38,7 @@ describe('accounts store', () => {
     localStorage.setItem(
       KEY,
       JSON.stringify([
-        { id: 'x', labels: 'HR;IT', type: 'LDAP', login: 'bob', password: 'ignored' },
+        { id: 'x', labels: 'HR;IT', type: ACCOUNT_TYPE_LDAP, login: 'bob', password: 'ignored' },
       ]),
     )
     const store = useAccountsStore()

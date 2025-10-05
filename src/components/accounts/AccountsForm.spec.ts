@@ -3,6 +3,7 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import AccountsForm from './AccountsForm.vue'
 import { useAccountsStore } from '@/stores/accounts'
+import { STORAGE_KEY_ACCOUNTS } from '@/constants/accounts'
 
 describe('AccountsForm', () => {
   beforeEach(() => {
@@ -32,6 +33,6 @@ describe('AccountsForm', () => {
 
     const store = useAccountsStore()
     expect(store.items.length).toBe(1)
-    expect(JSON.parse(localStorage.getItem('accounts:v1')!)).toHaveLength(1)
+    expect(JSON.parse(localStorage.getItem(STORAGE_KEY_ACCOUNTS)!)).toHaveLength(1)
   })
 })

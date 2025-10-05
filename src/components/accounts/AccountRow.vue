@@ -4,7 +4,7 @@
       <template #trigger>
         <n-input
           v-model:value="draft.labelsInput"
-          placeholder="Метка (через ; )"
+          :placeholder="labelsPlaceholder"
           @blur="onBlur('labels')"
           :status="err('labels')"
           :title="errMsg('labels') || undefined"
@@ -14,14 +14,19 @@
       {{ errMsg('labels') }}
     </n-tooltip>
 
-    <n-select :options="typeOptions" v-model:value="draft.type" @update:value="onTypeChange" />
+    <n-select
+      :options="typeOptions"
+      v-model:value="draft.type"
+      :placeholder="typePlaceholder"
+      @update:value="onTypeChange"
+    />
 
     <n-tooltip :disabled="!errMsg('login')" trigger="hover" placement="top">
       <template #trigger>
         <n-input
           :class="loginClass"
           v-model:value="draft.login"
-          placeholder="Логин"
+          :placeholder="loginPlaceholder"
           @blur="onBlur('login')"
           :status="err('login')"
           :title="errMsg('login') || undefined"
@@ -37,7 +42,7 @@
           class="password"
           v-model:value="draft.password"
           :type="showPwd ? 'text' : 'password'"
-          placeholder="Пароль"
+          :placeholder="passwordPlaceholder"
           @blur="onBlur('password')"
           :status="err('password')"
           :title="errMsg('password') || undefined"
@@ -71,7 +76,14 @@
 import { computed, ref, watch } from 'vue'
 import { NInput, NSelect, NButton, NTooltip } from 'naive-ui'
 import type { Account, AccountDraft } from '@/types/accounts'
+import { UI_TEXT } from '@/constants/uiText'
 import { validateDraft } from '@/composables/useAccountValidation'
+import {
+  ACCOUNT_TYPE_OPTIONS,
+  ACCOUNT_TYPE_LDAP,
+  ACCOUNT_TYPE_LOCAL,
+  TAGS_DELIMITER,
+} from '@/constants/accounts'
 
 const props = defineProps<{
   modelValue?: AccountDraft
@@ -89,7 +101,7 @@ const emit = defineEmits<{
 const inner = ref<AccountDraft>({
   id: props.initial?.id ?? '',
   labelsInput: props.initial?.labels?.map((t) => t.text).join('; ') ?? '',
-  type: props.initial?.type ?? 'Local',
+  type: props.initial?.type ?? ACCOUNT_TYPE_LOCAL,
   login: props.initial?.login ?? '',
   password: props.initial?.password ?? '',
   errors: {},
@@ -112,12 +124,13 @@ const draft = computed<AccountDraft>({
   },
 })
 
-const typeOptions = [
-  { label: 'LDAP', value: 'LDAP' },
-  { label: 'Локальная', value: 'Local' },
-]
+const typeOptions = ACCOUNT_TYPE_OPTIONS
+const labelsPlaceholder = UI_TEXT.placeholders.labels(TAGS_DELIMITER)
+const loginPlaceholder = UI_TEXT.placeholders.login
+const passwordPlaceholder = UI_TEXT.placeholders.password
+const typePlaceholder = UI_TEXT.placeholders.type
 
-const showPassword = computed(() => draft.value.type === 'Local')
+const showPassword = computed(() => draft.value.type === ACCOUNT_TYPE_LOCAL)
 
 const showPwd = ref(false)
 
@@ -144,7 +157,7 @@ function onBlur(field: 'labels' | 'login' | 'password') {
 }
 
 function onTypeChange() {
-  if (draft.value.type === 'LDAP') draft.value.password = ''
+  if (draft.value.type === ACCOUNT_TYPE_LDAP) draft.value.password = ''
   draft.value.touched.type = true
   runValidation()
 }
