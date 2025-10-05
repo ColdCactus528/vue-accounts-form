@@ -2,6 +2,7 @@ import { mount, type VueWrapper } from '@vue/test-utils'
 import { describe, it, expect } from 'vitest'
 import AccountRow from './AccountRow.vue'
 import type { Account, AccountDraft } from '@/types/accounts'
+import { ACCOUNT_TYPE_LOCAL, ACCOUNT_TYPE_LDAP } from '@/constants/accounts'
 
 function mountRow(model?: AccountDraft) {
   return mount(AccountRow, {
@@ -9,7 +10,7 @@ function mountRow(model?: AccountDraft) {
       modelValue: model ?? {
         id: 'r1',
         labelsInput: 'HR',
-        type: 'Local',
+        type: ACCOUNT_TYPE_LOCAL,
         login: 'a',
         password: 'p',
         errors: {},
@@ -51,7 +52,7 @@ describe('AccountRow', () => {
     const w = mountRow()
     const current = w.props('modelValue') as AccountDraft
     await w.setProps({
-      modelValue: { ...current, type: 'LDAP', password: '' },
+      modelValue: { ...current, type: ACCOUNT_TYPE_LDAP, password: '' },
     })
     await w.vm.$nextTick()
     expect(w.find('input[type="password"]').exists()).toBe(false)
